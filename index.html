@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>Road Trip Planner</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <script src="index.js"></script>
+    <script src="key.js"></script>
+    <script>
+      document.write("<script async defer src='https://maps.googleapis.com/maps/api/js?key=" + API_KEY + "&libraries=places&callback=initMap'><\/script>");
+    </script>
+  </head>
+  <body>
+    <header>
+        <h1>Road Trip Planner</h1>
+    </header>
+    <main>
+        <div class="container">
+            <section class="userInput"></section>
+                <form id="js-input-form">
+                    <label for="start-location">Starting Location: </label>
+                    <input name="start-location" id="start-location" class="auto" type="text">
+                    <br>
+
+                    <label for="end-location">Ending Location: </label>
+                    <input name="end-location" id="end-location" class="auto" type="text">
+                    <br>
+
+                    <label for="drive-hours">Approxomate hours to drive each day: </label>
+                    <input name="drive-hours" id="drive-hours" type="number">
+                    <br>
+                </form>
+            <section class="results">
+                <h3>Suggested Itenerary:</h3>
+                <ul id="stop-list">
+                </ul>
+            </section>
+        </div>  
+        <div id="map"></div>
+        &nbsp;
+        <div id="warnings-panel"></div>
+    </main>
+  </body>
+</html>
