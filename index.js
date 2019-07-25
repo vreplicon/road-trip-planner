@@ -12,6 +12,8 @@ let directionsService = null;
 let givenOrigin = '';
 let givenEnd = '';
 
+let fullTripTime;
+
 function reset() {
   $('#stop-list').empty();
   stopLocs = [];
@@ -34,9 +36,7 @@ function initMap() {
     // Create services to be used later
     directionsService = new google.maps.DirectionsService;
     directionsDisplay = new google.maps.DirectionsRenderer({map: map});
-    
-    //startInput = ;
-    //endInput = ;
+
     let startInput = new google.maps.places.Autocomplete($('#start-location')[0]);
     let endInput = new google.maps.places.Autocomplete($('#end-location')[0]);
 
