@@ -1,6 +1,5 @@
 'use strict'
 
-
 let stopLocs = [];
 
 // Services for map
@@ -12,7 +11,7 @@ let directionsService = null;
 let givenOrigin = '';
 let givenEnd = '';
 
-let fullTripTime;
+let fullTripTime = '';
 
 function reset() {
   $('#stop-list').empty();
@@ -21,8 +20,25 @@ function reset() {
 
 function getInitDirections() {
   if ($('#drive-hours').val() != "" &&  givenOrigin != '' && givenEnd != '') {
+    $('#stop-list').html('<h3>Loading.....</h3>');
     getDirections(givenOrigin, givenEnd);
   }
+}
+
+function getWeather(coords, day) {
+  let lat = coords.lat();
+  let long = coords.lng();
+  fetch(`http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&appid=74deda482573e0aeec696e9630c3504e`)  
+  .then(response => response.json())
+  .then(responseJson => {
+    let kTmp = responseJson.main.temp;
+    let cTmp = kTmp - 273;
+    let fTmp = Math.floor(cTmp * 9/5 + 32);
+    $(`#stop-list li:nth-child(${day})`).append(`<p>Current weather: ${fTmp} degrees F</p>`);
+  })
+  .catch(error =>  {
+    console.log(error);
+  });
 }
 
 function initMap() {
@@ -78,9 +94,13 @@ function getDirections(origin, end) {
   }, function(response, status) {
 
     if (status === 'OK') {
+      if (!fullTripTime) {
+        fullTripTime = response.routes[0].legs[0].duration.value;
+      }
       findStops(response);
     } else {
       window.alert('Directions request failed due to ' + status);
+      ('#stop-list').empty();
     }
   });
 }
@@ -149,13 +169,17 @@ function showStops(stopLocs) {
       }, function(response, status) {
         if (status === 'OK') {
           directionsDisplay.setDirections(response);
+          $('#stop-list').empty();
           let legs = response.routes[0].legs;
           for (let i = 0; i < legs.length; i++) {
-            addStop(i + 1, legs[i].start_address, legs[i].end_address, legs[i].duration.text, legs[i].distance.text);
+            getWeather(legs[i].end_location,i + 1);
+            addStop(i + 1, legs[i].start_address, legs[i].end_address, 
+              legs[i].duration.text, legs[i].distance.text);
           }
           
         } else {
           window.alert('Directions request failed due to ' + status);
+          $('#stop-list').empty();
         }
       });
 }
