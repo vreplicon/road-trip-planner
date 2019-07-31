@@ -53,6 +53,7 @@ function initMap() {
     directionsService = new google.maps.DirectionsService;
     directionsDisplay = new google.maps.DirectionsRenderer({map: map});
 
+    
     let startInput = new google.maps.places.Autocomplete($('#start-location')[0]);
     let endInput = new google.maps.places.Autocomplete($('#end-location')[0]);
 

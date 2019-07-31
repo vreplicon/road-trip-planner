@@ -8,6 +8,7 @@
     <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
     <script src="index.js"></script>
     <script src="key.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Amatic+SC|Darker+Grotesque&display=swap" rel="stylesheet">
     <script>
       document.write("<script async defer src='https://maps.googleapis.com/maps/api/js?key=" + API_KEY[4] + "&libraries=places&callback=initMap'><\/script>");
     </script>
@@ -15,16 +16,22 @@
   <body>
     <header>
         <h1>Road Trip Planner</h1>
+        <h3>Got a long road trip and don't know where to stop along the way? Enter your starting 
+          and ending locations as well as how many hours you would like to drive each day and let
+          us put together a possible iternerary for you! The stopping points will appear on the map
+          so you can zoom in and see if there are any good places to camp or stay near it. 
+        </h3>
     </header>
     <main>
-        <div class="container">
             <section class="userInput"></section>
                 <form id="js-input-form">
-                    <label for="start-location">Starting Location: </label>
+                  <fieldset>
+                    <legend>Trip Details</legend>
+                    <label for="start-location">Starting Location: </label><br>
                     <input name="start-location" id="start-location" class="auto" type="text">
                     <br>
 
-                    <label for="end-location">Ending Location: </label>
+                    <label for="end-location">Ending Location: </label><br>
                     <input name="end-location" id="end-location" class="auto" type="text">
                     <br>
 
@@ -41,16 +48,16 @@
                       <option value="12 ">12</option>
                     </select>
                     <br>
+                  </fieldset>
                 </form>
-            <section class="results">
-                <h3>Suggested Itenerary:</h3>
-                <ul id="stop-list">
-                </ul>
-            </section>
-        </div>  
-        <div id="map"></div>
-        &nbsp;
-        <div id="warnings-panel"></div>
+        <section class="results">
+          <div id="map"></div>
+          &nbsp;
+
+            <h2>Suggested Itenerary:</h2>
+            <ul id="stop-list">
+            </ul>
+        </section>
     </main>
   </body>
 </html>
