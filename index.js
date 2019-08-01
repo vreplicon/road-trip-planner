@@ -19,7 +19,9 @@ function reset() {
 }
 
 function getInitDirections() {
+
   if ($('#drive-hours').val() != "" &&  givenOrigin != '' && givenEnd != '') {
+    $(".results").removeClass("hidden");
     $('#stop-list').html('<h3>Loading.....</h3>');
     getDirections(givenOrigin, givenEnd);
   }
@@ -28,13 +30,13 @@ function getInitDirections() {
 function getWeather(coords, day) {
   let lat = coords.lat();
   let long = coords.lng();
-  fetch(`http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&appid=74deda482573e0aeec696e9630c3504e`)  
+  fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&appid=74deda482573e0aeec696e9630c3504e`)  
   .then(response => response.json())
   .then(responseJson => {
     let kTmp = responseJson.main.temp;
     let cTmp = kTmp - 273;
     let fTmp = Math.floor(cTmp * 9/5 + 32);
-    $(`#stop-list li:nth-child(${day})`).append(`<p>Current weather: ${fTmp} degrees F</p>`);
+    $(`.day${day}`).append(`<li><b>Current weather at End Location:</b> ${fTmp} °F</li>`);
   })
   .catch(error =>  {
     console.log(error);
@@ -140,11 +142,13 @@ function atTimeLimit(stepTime, totTime) {
 
 function addStop(day, start, end, duration, miles) {
     $('#stop-list').append(
-        `<li>Day ${day}
-        <br>
-        <p>Start: ${start}</p>
-        <p>End: ${end}</p>
-        <p>Drive Length: ${duration} (${miles})</p>
+        `<li>
+            <ul class="day-sum day${day}">
+              <li class="day">Day ${day}</li>
+              <li class="start"><b>Start (${String.fromCharCode(64 + day)}):</b> ${start}</li>
+              <li class="end"><b>End (${String.fromCharCode(65 + day)}):</b> ${end}</li>
+              <li class="drive-length"><b>Drive Length:</b> ${duration} (${miles})</li>
+            </ul>
         </li>`
     );
 }
