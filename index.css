@@ -105,3 +105,27 @@ li {
     text-align: center;
    
 }
+
+@media screen and (min-width: 992px) {
+    #map {
+        width: 40vw;
+        height: 45vw;
+    }
+
+    .container {
+        display: flex;
+        align-content: space-between;
+        justify-content: space-between;
+    }
+
+
+    .results {
+        overflow: auto;
+        width: 40vw;
+        height: 45vw;
+    }
+
+    #stop-list {
+        padding-right: 15px;
+    }
+}
