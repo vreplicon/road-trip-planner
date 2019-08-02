@@ -11,38 +11,8 @@ let directionsService = null;
 let givenOrigin = '';
 let givenEnd = '';
 
-let fullTripTime = '';
 
-function reset() {
-  $('#stop-list').empty();
-  stopLocs = [];
-}
-
-function getInitDirections() {
-
-  if ($('#drive-hours').val() != "" &&  givenOrigin != '' && givenEnd != '') {
-    $(".results").removeClass("hidden");
-    $('#stop-list').html('<h3>Loading.....</h3>');
-    getDirections(givenOrigin, givenEnd);
-  }
-}
-
-function getWeather(coords, day) {
-  let lat = coords.lat();
-  let long = coords.lng();
-  fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&appid=74deda482573e0aeec696e9630c3504e`)  
-  .then(response => response.json())
-  .then(responseJson => {
-    let kTmp = responseJson.main.temp;
-    let cTmp = kTmp - 273;
-    let fTmp = Math.floor(cTmp * 9/5 + 32);
-    $(`.day${day}`).append(`<li><b>Current weather at End Location:</b> ${fTmp} °F</li>`);
-  })
-  .catch(error =>  {
-    console.log(error);
-  });
-}
-
+// Sets up the map and related services
 function initMap() {
 
     // Create map centered on USA
@@ -59,55 +29,75 @@ function initMap() {
     let startInput = new google.maps.places.Autocomplete($('#start-location')[0]);
     let endInput = new google.maps.places.Autocomplete($('#end-location')[0]);
 
+    // Add event listerners to both of the autocomplete input fields
     startInput.addListener('place_changed', function() {
-      let place = startInput.getPlace();
-      if (!place.geometry) {
-        // User entered the name of a Place that was not suggested and
-        // pressed the Enter key, or the Place Details request failed.
-        window.alert("No details available for input: '" + place.name + ". Please re-enter location.'");
-        return;
-      } else {
-        reset();
-        givenOrigin = place.geometry.location;
-        getInitDirections();
-      }
+        let place = startInput.getPlace();
+        if (!place.geometry) {
+            // User entered the name of a Place that was not suggested and
+            // pressed the Enter key, or the Place Details request failed.
+            window.alert("No details available for input: '" + place.name + ". Please re-enter location.'");
+            return;
+        } else {
+            reset();
+            givenOrigin = place.geometry.location;
+            getInitDirections();
+        }
     });
 
     endInput.addListener('place_changed', function() {
       let place = endInput.getPlace();
       if (!place.geometry) {
-        // User entered the name of a Place that was not suggested and
-        // pressed the Enter key, or the Place Details request failed.
-        window.alert("No details available for input: '" + place.name + ". Please re-enter location'");
+                // User entered the name of a Place that was not suggested and
+                // pressed the Enter key, or the Place Details request failed.
+                window.alert("No details available for input: '" + place.name + ". Please re-enter location'");
         return;
       } else {
-        reset();
-        givenEnd = place.geometry.location;
-        getInitDirections();
+            reset();
+            givenEnd = place.geometry.location;
+            getInitDirections();
       }
     });   
 }
 
+// Clear current stored results
+function reset() {
+    $('#stop-list').empty();
+    stopLocs = [];
+}
+  
+// Get initial set of directions from the users entered start to the
+// entered end location
+function getInitDirections() {
 
+    if ($('#drive-hours').val() != "" &&  givenOrigin != '' && givenEnd != '') {
+        $(".results").removeClass("hidden");
+        $('#stop-list').html('<h3>Loading.....</h3>');
+        getDirections(givenOrigin, givenEnd);
+    }
+}
+
+
+// Get directions from current found stop to given end location
 function getDirections(origin, end) {
-  directionsService.route({
+    directionsService.route({
     origin: origin,
     destination: end,
     travelMode: 'DRIVING'
-  }, function(response, status) {
+    }, function(response, status) {
 
-    if (status === 'OK') {
-      if (!fullTripTime) {
-        fullTripTime = response.routes[0].legs[0].duration.value;
-      }
-      findStops(response);
-    } else {
-      window.alert('Directions request failed due to ' + status);
-      ('#stop-list').empty();
-    }
-  });
+        if (status === 'OK') {
+            findStops(response);
+        } else {
+            window.alert('Directions request failed due to ' + status);
+            ('#stop-list').empty();
+        }
+    });
 }
 
+
+// Go through each step given in the direction results 
+// and find at what point the time driven is equal to 
+// the given time limit. Add this point to stopLocs
 function findStops(directionResult) {
 
     let myRoute = directionResult.routes[0].legs[0];
@@ -130,7 +120,8 @@ function findStops(directionResult) {
     }
 }
 
-
+// Checks if the current driving time for the day
+// is more than the drive time limit given by user
 function atTimeLimit(stepTime, totTime) {
     let driveTime = $('#drive-hours')[0].value * 3600;
     if (totTime + stepTime > driveTime) {
@@ -140,19 +131,10 @@ function atTimeLimit(stepTime, totTime) {
     }
 }
 
-function addStop(day, start, end, duration, miles) {
-    $('#stop-list').append(
-        `<li>
-            <ul class="day-sum day${day}">
-              <li class="day">Day ${day}</li>
-              <li class="start"><b>Start (${String.fromCharCode(64 + day)}):</b> ${start}</li>
-              <li class="end"><b>End (${String.fromCharCode(65 + day)}):</b> ${end}</li>
-              <li class="drive-length"><b>Drive Length:</b> ${duration} (${miles})</li>
-            </ul>
-        </li>`
-    );
-}
 
+
+// Retrieve the location that is approxamentaly 
+// at the drive time limit
 function getSearchCenter(neededTime, step) {
 
     let ratio = neededTime / step.duration.value;
@@ -163,6 +145,8 @@ function getSearchCenter(neededTime, step) {
     return searchCenter;
 }
 
+// Re-calculate directions with all of the stop locations
+// entered as waypoints and render this on the map
 function showStops(stopLocs) {
     let directionsService = new google.maps.DirectionsService;
     directionsService.route({
@@ -172,22 +156,65 @@ function showStops(stopLocs) {
         optimizeWaypoints: true,
         travelMode: 'DRIVING'
       }, function(response, status) {
+        
         if (status === 'OK') {
-          directionsDisplay.setDirections(response);
-          $('#stop-list').empty();
-          let legs = response.routes[0].legs;
-          for (let i = 0; i < legs.length; i++) {
-            getWeather(legs[i].end_location,i + 1);
-            addStop(i + 1, legs[i].start_address, legs[i].end_address, 
-              legs[i].duration.text, legs[i].distance.text);
-          }
+          
+            // Render directions on map
+            directionsDisplay.setDirections(response);
+           
+           // Clear stop list of any current results
+            $('#stop-list').empty();
+
+            // For each stop, add info to the list
+            let legs = response.routes[0].legs;
+            for (let i = 0; i < legs.length; i++) {
+                addStop(i + 1, legs[i].start_address, legs[i].end_address, 
+                legs[i].duration.text, legs[i].distance.text);
+                getWeather(legs[i].end_location,i + 1);
+            }
           
         } else {
-          window.alert('Directions request failed due to ' + status);
-          $('#stop-list').empty();
+            window.alert('Directions request failed due to ' + status);
+            $('#stop-list').empty();
         }
-      });
+    });
 }
+
+// Add stop to the results section
+function addStop(day, start, end, duration, miles) {
+    $('#stop-list').append(
+        `<li>
+            <ul class="day-sum day${day}">
+                <li class="day">Day ${day}</li>
+                <li class="start"><b>Start (${String.fromCharCode(64 + day)}):</b> ${start}</li>
+                <li class="end"><b>End (${String.fromCharCode(65 + day)}):</b> ${end}</li>
+                <li class="drive-length"><b>Drive Length:</b> ${duration} (${miles})</li>
+            </ul>
+        </li>`
+    );
+}
+
+// Using fetch, retrives the weather for a giver location
+function getWeather(coords, day) {
+  let lat = coords.lat();
+  let long = coords.lng();
+  let apiEndPoint = 'https://api.openweathermap.org/data/2.5/weather';
+  let apiId = '74deda482573e0aeec696e9630c3504e';
+  fetch(`${apiEndPoint}?lat=${lat}&lon=${long}&appid=${apiId}`)  
+  .then(response => response.json())
+  .then(responseJson => {
+    let kTmp = responseJson.main.temp;
+    let cTmp = kTmp - 273;
+    let fTmp = Math.floor(cTmp * 9/5 + 32);
+    $(`.day${day}`).append(`<li><b>Current weather at End Location:</b> ${fTmp} °F</li>`);
+  })
+  .catch(error =>  {
+    console.log(error);
+  });
+}
+
+
+// Monitors drive hours input for change
 $(function() {
   $('#drive-hours').change(e => {
     if ($('#drive-hours').val() < 1) {
