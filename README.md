@@ -3,5 +3,15 @@ This app is designed to help in the process of planning road trips. The user ent
 
 See it for yourself [here](https://vreplicon.github.io/road-trip-planner/)!
 
+# Screenshots
+
+User Input:
+
+![Image of user input section](uiShot.PNG)
+
+Results Section:
+
+![Image of results section](responseShot.PNG)
+
 # Technologies Used
 This app is based on the Google Maps Javascript API. In addition, it uses jQuery, HTML, and CSS.
